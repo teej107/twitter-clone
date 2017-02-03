@@ -3,11 +3,10 @@
  */
 Date.prototype.tweetTime = function ()
 {
-    var date = new Date();
-    var am = date.getHours() < 13;
-    var hour = (am ? date.getHours() : date.getHours() - 12);
-    var time = hour + ":" + date.getMinutes() + " " + (am ? "AM" : "PM");
-    var day = date.getDay() + " " + this.shortMonthName[(date.getMonth() + 1)] + " " + (date.getFullYear() % 100);
+    var am = this.getHours() < 13;
+    var hour = (am ? this.getHours() : this.getHours() - 12);
+    var time = hour + ":" + this.getMinutes() + " " + (am ? "AM" : "PM");
+    var day = this.getDay() + " " + this.shortMonthName[(this.getMonth() + 1)] + " " + (this.getFullYear() % 100);
     return time + " - " + day;
 };
 Date.prototype.shortMonthName = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"]
@@ -16,6 +15,8 @@ $(document).ready(function ()
 {
     var tweetTextBox = $('#tweet-text-box');
     var tweetSubmit = $('#tweet-submit');
+    var tweetActions = $('.tweet-actions');
+
     tweetTextBox.on('focus', function ()
     {
         $("#tweet-content *").css('visibility', 'visible');
@@ -32,6 +33,15 @@ $(document).ready(function ()
     tweetSubmit.on("click", function ()
     {
         submitTweet("Your Name Here", "@yourname", tweetTextBox.val());
+    });
+    tweetActions.css('opacity', '0');
+    tweetActions.on('mouseover', function ()
+    {
+        $(this).css('opacity', '1');
+    });
+    tweetActions.on('mouseleave', function ()
+    {
+       $(this).css('opacity', '0');
     });
 });
 
@@ -71,10 +81,10 @@ function submitTweet(fullname, username, message)
         new Date().tweetTime() +
         '</div>' +
         '</div>' +
-/*        '<div class="reply">' +
-        '<img class="avatar" src="img/alagoon.jpg" />' +
-        '<textarea class="tweet-compose" placeholder="Reply to "' + username + '/></textarea>' +
-        '</div>' +*/
+        /*        '<div class="reply">' +
+         '<img class="avatar" src="img/alagoon.jpg" />' +
+         '<textarea class="tweet-compose" placeholder="Reply to "' + username + '/></textarea>' +
+         '</div>' +*/
         '</div>' +
         '</div>';
 
