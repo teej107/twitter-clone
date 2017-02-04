@@ -11,16 +11,39 @@ Date.prototype.tweetTime = function ()
 };
 Date.prototype.shortMonthName = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"]
 
+var currentTweet = null;
+
 $(document).ready(function ()
 {
     var tweetTextBox = $('#tweet-text-box');
+    var tweetTextBoxControls = $("#tweet-controls");
     var tweetSubmit = $('#tweet-submit');
-    var tweetActions = $('.tweet-actions');
+    tweetTextBoxControls.hide();
 
-    tweetTextBox.on('focus', function ()
+    var cancel = false;
+    var setTweetTextBoxSize = function (newHeight)
     {
-        $("#tweet-content *").css('visibility', 'visible');
-        $(this).height($(this).height() * 2)
+        if (cancel)
+            return;
+
+        cancel = true;
+
+        $(this).height(newHeight);
+        var transition = 400;
+        $(this).css('-webkit-transition', 'height ' + transition + 'ms');
+        setTimeout(function ()
+        {
+            $(this).css('-webkit-transition', '');
+        }.bind($(this)), transition);
+
+        cancel = false;
+    }.bind(tweetTextBox);
+
+    tweetTextBox.one('focus', function ()
+    {
+        tweetTextBoxControls.slideDown();
+        $(this).css('overflow', 'hidden');
+        setTweetTextBoxSize($(this).height() * 2);
     });
     tweetTextBox.on('input', function (element)
     {
@@ -29,21 +52,56 @@ $(document).ready(function ()
         charCount.text(leftover);
         charCount.css("color", leftover < 10 ? "red" : "#999");
         tweetSubmit.prop("disabled", leftover < 0);
+
+        setTimeout(function ()
+        {
+            if ($(this).prop('scrollTop') > 0)
+            {
+                setTweetTextBoxSize($(this).height() + 30);
+            }
+        }.bind($(this)), 1);
+
     });
     tweetSubmit.on("click", function ()
     {
         submitTweet("Your Name Here", "@yourname", tweetTextBox.val());
     });
-    tweetActions.css('opacity', '0');
-    tweetActions.on('mouseover', function ()
-    {
-        $(this).css('opacity', '1');
-    });
-    tweetActions.on('mouseleave', function ()
-    {
-       $(this).css('opacity', '0');
-    });
+
+    initTweets($('body'), true);
 });
+
+function initTweets(element, findTweet)
+{
+    var tweetActions = element.find($('.tweet-actions'));
+    var tweetContent = findTweet ? element.find($('.tweet')) : element;
+    var stats = element.find($('.stats'));
+    var reply = element.find($('.reply'));
+
+    stats.hide();
+    reply.hide();
+
+    tweetActions.css('opacity', '0');
+    tweetContent.on('mouseover', function ()
+    {
+        var singleAction = $(this).find(tweetActions);
+        singleAction.css('opacity', '1');
+        singleAction.css('-webkit-transition', 'opacity 400ms');
+
+    });
+    tweetContent.on('mouseleave', function ()
+    {
+        var singleAction = $(this).find(tweetActions);
+        singleAction.css('opacity', '0');
+    });
+
+    tweetContent.on('click', function ()
+    {
+        $('.stats').slideUp();
+        $('.reply').slideUp();
+        $(this).find('.reply').slideDown();
+        $(this).find('.stats').slideDown();
+    });
+}
 
 function submitTweet(fullname, username, message)
 {
@@ -81,12 +139,25 @@ function submitTweet(fullname, username, message)
         new Date().tweetTime() +
         '</div>' +
         '</div>' +
-        /*        '<div class="reply">' +
-         '<img class="avatar" src="img/alagoon.jpg" />' +
-         '<textarea class="tweet-compose" placeholder="Reply to "' + username + '/></textarea>' +
-         '</div>' +*/
+        '<div class="reply">' +
+        '<img class="avatar" src="img/alagoon.jpg" />' +
+        '<textarea class="tweet-compose" placeholder="Reply to "' + username + '/></textarea>' +
+        '</div>' +
         '</div>' +
         '</div>';
 
-    $('#stream').prepend(tweetContent);
+    var stream = $('#stream');
+    stream.prepend(tweetContent);
+    var child = $(stream.children()[0]);
+    child.hide();
+
+    var textBox = $('#tweet-text-box');
+    textBox.val('');
+    textBox.trigger('input');
+    setTimeout(function ()
+    {
+        initTweets(child, false);
+        child.slideDown();
+
+    });
 }

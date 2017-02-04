@@ -199,11 +199,6 @@ body
     display: inline-block;
 }
 
-#tweet-controls *
-{
-    visibility: hidden;
-}
-
 #char-count
 {
     font-size: 14px;
