@@ -47,7 +47,7 @@ $(document).ready(function ()
     });
     tweetTextBox.on('input', function (element)
     {
-        var leftover = 140 - $(this).val().length;
+        var leftover = 140 - $(this).val().trim().length;
         var charCount = $('#char-count');
         charCount.text(leftover);
         charCount.css("color", leftover < 10 ? "red" : "#999");
@@ -105,13 +105,16 @@ function initTweets(element, findTweet)
 
 function submitTweet(fullname, username, message)
 {
+    if (message.trim().length === 0)
+        return;
+
     var tweetContent =
         '<div class="tweet">' +
         '<div class="content">' +
         '<img class="avatar" src="img/alagoon.jpg" />' +
         '<strong class="fullname">' + fullname + ' </strong>' +
         '<span class="username">' + username + '</span>' +
-        '<p class="tweet-text">' + message + '</p>' +
+        '<p class="tweet-text">' + message.trim() + '</p>' +
         '<div class="tweet-actions">' +
         '<ul>' +
         '<li><span class="icon action-reply"></span> Reply</li>' +
